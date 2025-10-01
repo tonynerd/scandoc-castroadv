@@ -1,24 +1,24 @@
-# 🌐 Configuração de Domínio Personalizado - ScanDoc CastroADC
+# 🌐 Configuração de Domínio Personalizado - ScanDoc CastroADV
 
 ## 🎯 **Domínio Desejado**
-- **Principal**: `scandoc.castroadc.com`
-- **Alternativo**: `www.scandoc.castroadc.com`
-- **Projeto**: `scandoc.castroadc`
+- **Principal**: `scandoc.castroadv.com`
+- **Alternativo**: `www.scandoc.castroadv.com`
+- **Projeto**: `scandoc-castroadv`
 
 ## 📋 **Passo a Passo para Configurar Domínio**
 
 ### 1. **Deploy no Vercel Primeiro**
 1. Acesse: https://vercel.com/dashboard
-2. Import projeto: `tonynerd/Sacan-DOC`
-3. Nome do projeto: `scandoc.castroadc`
+2. Import projeto: `tonynerd/scandoc-castroadv`
+3. Nome do projeto: `scandoc-castroadv`
 4. Faça o deploy normal
 
 ### 2. **Adicionar Domínio Personalizado**
 1. No dashboard do projeto deployado
 2. Vá em **Settings** → **Domains**
 3. Adicione os domínios:
-   - `scandoc.castroadc.com`
-   - `www.scandoc.castroadc.com`
+   - `scandoc.castroadv.com`
+   - `www.scandoc.castroadv.com`
 
 ### 3. **Configurar DNS (No seu provedor de domínio)**
 

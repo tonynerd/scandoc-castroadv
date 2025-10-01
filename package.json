@@ -1,7 +1,7 @@
 {
-  "name": "scandoc.castroadc",
+  "name": "scandoc-castroadv",
   "version": "1.0.0",
-  "description": "ScanDoc CastroADC - Scanner de Documentos Inteligente",
+  "description": "ScanDoc CastroADV - Scanner de Documentos Inteligente",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -13,9 +13,9 @@
     "servidor",
     "local"
   ],
-  "author": "CastroADC",
+  "author": "CastroADV",
   "license": "MIT",
-  "homepage": "https://scandoc.castroadc.com",
+  "homepage": "https://scandoc.castroadv.com",
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",

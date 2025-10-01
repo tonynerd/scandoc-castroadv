@@ -1,8 +1,8 @@
-# 📄 ScanDoc CastroADC
+# 📄 ScanDoc CastroADV
 
 Sistema inteligente de escaneamento e extração de dados de documentos com preenchimento automático de formulários utilizando Inteligência Artificial.
 
-**🌐 Acesso online**: https://scandoc.castroadc.com
+**🌐 Acesso online**: https://scandoc.castroadv.com
 
 ## 🎯 Funcionalidades
 

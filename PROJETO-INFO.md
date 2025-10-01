@@ -1,17 +1,17 @@
-# 📋 ScanDoc CastroADC - Informações do Projeto
+# 📋 ScanDoc CastroADV - Informações do Projeto
 
 ## 🎯 **Identidade do Projeto**
 
-- **Nome**: ScanDoc CastroADC  
-- **Domínio**: scandoc.castroadc.com
-- **Repositório**: tonynerd/Sacan-DOC
-- **Vercel Project**: scandoc.castroadc
+- **Nome**: ScanDoc CastroADV  
+- **Domínio**: scandoc.castroadv.com
+- **Repositório**: tonynerd/scandoc-castroadv
+- **Vercel Project**: scandoc-castroadv
 
 ## 🌐 **URLs**
 
-- **Produção**: https://scandoc.castroadc.com
-- **Alternativo**: https://www.scandoc.castroadc.com  
-- **Vercel**: https://scandoc-castroadc.vercel.app
+- **Produção**: https://scandoc.castroadv.com
+- **Alternativo**: https://www.scandoc.castroadv.com  
+- **Vercel**: https://scandoc-castroadv.vercel.app
 - **Desenvolvimento**: http://localhost:3000
 
 ## 📦 **Informações Técnicas**

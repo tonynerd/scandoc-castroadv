@@ -22,7 +22,7 @@ app.get('/scanner', (req, res) => {
 
 // Iniciar servidor
 app.listen(PORT, () => {
-    console.log('🔧 ScanDoc CastroADC - Servidor Node.js');
+    console.log('🔧 ScanDoc CastroADV - Servidor Node.js');
     console.log('='.repeat(50));
     console.log('🚀 Servidor iniciado com sucesso!');
     console.log(`📍 Diretório: ${__dirname}`);

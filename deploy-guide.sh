@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Guia Interativo para Deploy no Vercel
-echo "🚀 ScanDoc CastroADC - GUIA DE DEPLOY NO VERCEL"
+echo "🚀 ScanDoc CastroADV - GUIA DE DEPLOY NO VERCEL"
 echo "=================================="
 echo ""
 
@@ -32,8 +32,8 @@ echo ""
 echo "1️⃣  ACESSE: https://vercel.com"
 echo "2️⃣  FAÇA LOGIN com GitHub"
 echo "3️⃣  CLIQUE EM: 'Add New...' → 'Project'"
-echo "4️⃣  ENCONTRE: 'tonynerd/Sacan-DOC' 
-    💡 Renomeie para: 'scandoc.castroadc'"
+echo "4️⃣  ENCONTRE: 'tonynerd/scandoc-castroadv'
+    💡 Nome do projeto: 'scandoc-castroadv'"
 echo "5️⃣  CLIQUE EM: 'Import'"
 echo ""
 echo "✅ CONFIGURAÇÃO AUTOMÁTICA:"
