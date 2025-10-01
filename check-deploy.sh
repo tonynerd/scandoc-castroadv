@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script para verificar status do deploy Vercel
-echo "🔍 Verificador de Deploy Vercel"
+echo "🔍 ScanDoc CastroADC - Verificador de Deploy"
 echo "================================"
 
 # Função para verificar se uma URL está online
@@ -23,10 +23,11 @@ check_url() {
 # URLs possíveis do projeto
 GITHUB_REPO="https://github.com/tonynerd/Sacan-DOC"
 POSSIBLE_URLS=(
-    "https://sacan-doc.vercel.app"
-    "https://sacan-doc-tonynerd.vercel.app"
-    "https://sacan-doc-git-main-tonynerd.vercel.app"
-    "https://scanner-de-documentos.vercel.app"
+    "https://scandoc.castroadc.com"
+    "https://www.scandoc.castroadc.com"
+    "https://scandoc-castroadc.vercel.app"
+    "https://scandoc-castroadc-tonynerd.vercel.app"
+    "https://scandoc-castroadc-git-main-tonynerd.vercel.app"
 )
 
 echo ""

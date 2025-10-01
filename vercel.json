@@ -1,3 +1,6 @@
 {
-  "version": 2
+  "version": 2,
+  "name": "scandoc.castroadc",
+  "alias": ["scandoc.castroadc.com", "www.scandoc.castroadc.com"],
+  "regions": ["gru1", "iad1"]
 }

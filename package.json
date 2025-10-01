@@ -1,7 +1,7 @@
 {
-  "name": "scanner-doc-server",
+  "name": "scandoc.castroadc",
   "version": "1.0.0",
-  "description": "Servidor local para teste da aplicação Scanner de Documentos",
+  "description": "ScanDoc CastroADC - Scanner de Documentos Inteligente",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -13,8 +13,9 @@
     "servidor",
     "local"
   ],
-  "author": "tonynerd",
+  "author": "CastroADC",
   "license": "MIT",
+  "homepage": "https://scandoc.castroadc.com",
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",

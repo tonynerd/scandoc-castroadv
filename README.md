@@ -1,6 +1,8 @@
-# 📄 Scanner de Documentos Inteligente
+# 📄 ScanDoc CastroADC
 
-Extrator de dados capturado a partir de um documento escaneado com auto preenchimento de formulário usando Inteligência Artificial.
+Sistema inteligente de escaneamento e extração de dados de documentos com preenchimento automático de formulários utilizando Inteligência Artificial.
+
+**🌐 Acesso online**: https://scandoc.castroadc.com
 
 ## 🎯 Funcionalidades
 
