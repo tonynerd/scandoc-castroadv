@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scanner de Documentos Inteligente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="app-root"></div>
+
+    <script>
+        // Define the main application logic and UI rendering in JavaScript.
+        class DocumentScannerApp {
+            constructor(rootElement) {
+                this.root = rootElement;
+                this.base64Image = null;
+
+                // Configure PDF.js worker
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+                
+                this.render();
+                this.bindDOMElements();
+                this.addEventListeners();
+            }
+
+            // Method to create and inject CSS styles
+            injectStyles() {
+                const styles = `
+                    body { font-family: 'Inter', sans-serif; }
+                    .loader {
+                        border: 4px solid #f3f3f3;
+                        border-top: 4px solid #3498db;
+                        border-radius: 50%;
+                        width: 40px;
+                        height: 40px;
+                        animation: spin 1s linear infinite;
+                    }
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                    #document-template {
+                        border: 1px solid #e2e8f0;
+                        padding: 2rem;
+                        border-radius: 0.5rem;
+                        background: white;
+                        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+                        line-height: 1.8;
+                        color: #334155;
+                    }
+                    .placeholder {
+                        background-color: #e0f2fe;
+                        color: #0c4a6e;
+                        padding: 0.1rem 0.5rem;
+                        border-radius: 0.25rem;
+                        font-family: monospace;
+                        font-weight: 500;
+                    }
+                `;
+                const styleSheet = document.createElement("style");
+                styleSheet.type = "text/css";
+                styleSheet.innerText = styles;
+                document.head.appendChild(styleSheet);
+            }
+            
+            // Method to generate the entire UI HTML
+            generateHTML() {
+                return `
+                    <div class="w-full max-w-5xl mx-auto">
+                        <header class="text-center mb-10">
+                            <h1 class="text-4xl font-bold text-gray-900">Scanner de Documentos Inteligente</h1>
+                            <p class="text-lg text-gray-600 mt-2">Envie a imagem ou PDF de um documento para extrair os dados e preencher o formulário.</p>
+                        </header>
+                        <main class="grid md:grid-cols-2 gap-8">
+                            <!-- Coluna de Ação: Upload e Extração -->
+                            <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                                <h2 class="text-2xl font-semibold mb-4 border-b pb-2">Passo 1: Enviar Documento</h2>
+                                <div class="mb-4">
+                                    <label for="doc-uploader" class="block mb-2 font-medium text-gray-700">Escolha uma imagem ou PDF:</label>
+                                    <input type="file" id="doc-uploader" accept="image/*,application/pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                                </div>
+                                <div id="image-preview-container" class="mt-4 hidden w-full p-4 border-2 border-dashed rounded-lg text-center">
+                                    <img id="image-preview" src="" alt="Pré-visualização do documento" class="max-w-full max-h-64 mx-auto rounded">
+                                </div>
+                                <button id="extract-button" class="mt-6 w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 disabled:bg-gray-400 flex items-center justify-center" disabled>
+                                    <svg id="button-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="m12 19-7-7 7-7"/><path d="m19 12H5"/></svg>
+                                    <span id="button-text">Extrair Dados</span>
+                                    <div id="loader" class="loader hidden ml-3"></div>
+                                </button>
+                                <div class="mt-6">
+                                    <h3 class="text-xl font-semibold mb-3">Passo 2: Dados Extraídos</h3>
+                                    <div class="space-y-3">
+                                        <div>
+                                            <label for="nome" class="text-sm font-medium text-gray-600">Nome Completo</label>
+                                            <input type="text" id="nome" placeholder="Aguardando extração..." class="mt-1 w-full p-2 bg-gray-100 border rounded-md" disabled>
+                                        </div>
+                                        <div>
+                                            <label for="data_nascimento" class="text-sm font-medium text-gray-600">Data de Nascimento</label>
+                                            <input type="text" id="data_nascimento" placeholder="Aguardando extração..." class="mt-1 w-full p-2 bg-gray-100 border rounded-md" disabled>
+                                        </div>
+                                        <div>
+                                            <label for="numero_documento" class="text-sm font-medium text-gray-600">Número do Documento</label>
+                                            <input type="text" id="numero_documento" placeholder="Aguardando extração..." class="mt-1 w-full p-2 bg-gray-100 border rounded-md" disabled>
+                                        </div>
+                                    </div>
+                                </div>
+                                 <div id="error-message" class="mt-4 text-center text-red-600 font-medium"></div>
+                            </div>
+                            <!-- Coluna do Documento Final -->
+                            <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                                <h2 class="text-2xl font-semibold mb-4 border-b pb-2">Passo 3: Documento Preenchido</h2>
+                                <div id="document-template">
+                                    <h3 class="text-xl font-bold mb-4 text-center">DECLARAÇÃO DE PARTICIPAÇÃO</h3>
+                                    <p>
+                                        Eu, <strong id="doc_nome" class="placeholder">[NOME COMPLETO]</strong>,
+                                        nascido(a) em <strong id="doc_data_nascimento" class="placeholder">[DATA DE NASCIMENTO]</strong>,
+                                        portador(a) do documento de identidade número <strong id="doc_numero_documento" class="placeholder">[NÚMERO DO DOCUMENTO]</strong>,
+                                        declaro para os devidos fins que participei do evento de capacitação realizado
+                                        nesta instituição.
+                                    </p>
+                                    <p class="mt-6">A presente declaração é firmada sob as penas da lei, e eu me responsabilizo
+                                        pela veracidade das informações aqui prestadas.</p>
+                                    <div class="mt-12 text-center">
+                                        <p>_________________________________________</p>
+                                        <p><strong id="doc_assinatura" class="placeholder">[NOME COMPLETO]</strong></p>
+                                    </div>
+                                     <p class="text-right mt-8">Caetanos, <span id="current-date"></span></p>
+                                </div>
+                            </div>
+                        </main>
+                    </div>
+                `;
+            }
+            
+            // Initial render method
+            render() {
+                this.injectStyles();
+                this.root.innerHTML = this.generateHTML();
+            }
+
+            // Bind references to the newly created DOM elements
+            bindDOMElements() {
+                this.uploader = document.getElementById('doc-uploader');
+                this.imagePreviewContainer = document.getElementById('image-preview-container');
+                this.imagePreview = document.getElementById('image-preview');
+                this.extractButton = document.getElementById('extract-button');
+                this.buttonText = document.getElementById('button-text');
+                this.buttonIcon = document.getElementById('button-icon');
+                this.loader = document.getElementById('loader');
+                this.errorMessage = document.getElementById('error-message');
+                this.nomeInput = document.getElementById('nome');
+                this.dataNascimentoInput = document.getElementById('data_nascimento');
+                this.numeroDocumentoInput = document.getElementById('numero_documento');
+                this.docNome = document.getElementById('doc_nome');
+                this.docDataNascimento = document.getElementById('doc_data_nascimento');
+                this.docNumeroDocumento = document.getElementById('doc_numero_documento');
+                this.docAssinatura = document.getElementById('doc_assinatura');
+                document.getElementById('current-date').textContent = new Date().toLocaleDateString('pt-BR');
+            }
+            
+            // Add event listeners to the elements
+            addEventListeners() {
+                this.uploader.addEventListener('change', this.handleFileSelect.bind(this));
+                this.extractButton.addEventListener('click', this.handleExtractData.bind(this));
+            }
+
+            // Event handler for file input
+            handleFileSelect(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.imagePreview.src = e.target.result;
+                        this.base64Image = e.target.result.split(',')[1];
+                        this.imagePreviewContainer.classList.remove('hidden');
+                        this.extractButton.disabled = false;
+                        this.resetForm();
+                    };
+                    reader.readAsDataURL(file);
+                } else if (file.type === 'application/pdf') {
+                    this.handlePdfFile(file);
+                } else {
+                    this.showError("Formato de arquivo não suportado. Use imagem ou PDF.");
+                    this.extractButton.disabled = true;
+                }
+            }
+            
+            // Logic to handle PDF files
+            async handlePdfFile(file) {
+                this.setLoadingState(true, 'Processando PDF...');
+                this.resetForm();
+                const reader = new FileReader();
+                
+                reader.onload = async (e) => {
+                    try {
+                        const pdfData = new Uint8Array(e.target.result);
+                        const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+                        const page = await pdf.getPage(1);
+                        const scale = 2.0;
+                        const viewport = page.getViewport({ scale });
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+                        await page.render({ canvasContext: context, viewport: viewport }).promise;
+                        const imageDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+                        this.imagePreview.src = imageDataUrl;
+                        this.base64Image = imageDataUrl.split(',')[1];
+                        this.imagePreviewContainer.classList.remove('hidden');
+                        this.extractButton.disabled = false;
+                    } catch (error) {
+                        console.error('Erro ao processar PDF:', error);
+                        this.showError('Não foi possível ler o arquivo PDF.');
+                        this.extractButton.disabled = true;
+                    } finally {
+                        this.setLoadingState(false);
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            }
+
+            // Logic to call API and extract data
+            async handleExtractData() {
+                if (!this.base64Image) {
+                    this.showError("Por favor, selecione uma imagem ou PDF primeiro.");
+                    return;
+                }
+                
+                this.setLoadingState(true);
+                this.resetForm();
+
+                try {
+                    const apiKey = "AIzaSyCD2n9pSRB_YQoR6ibL2EYpJHary04yDUU";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                    const systemPrompt = `Você é um assistente de extração de dados altamente preciso. Analise a imagem do documento fornecida. Extraia as seguintes informações: 1. O nome completo da pessoa. 2. A data de nascimento no formato DD/MM/AAAA. 3. O número do documento (como RG, CNH, etc.). Responda APENAS com um objeto JSON contendo as chaves "nome", "dataNascimento" e "numeroDocumento". Se uma informação não puder ser encontrada, retorne null para o valor correspondente.`;
+                    const payload = {
+                        contents: [{ parts: [{ text: systemPrompt }, { inlineData: { mimeType: "image/jpeg", data: this.base64Image } }] }],
+                        generationConfig: { responseMimeType: "application/json" }
+                    };
+                    
+                    const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    if (!response.ok) throw new Error(`Erro na API: ${response.statusText}`);
+
+                    const result = await response.json();
+                    
+                    if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0].text) {
+                        const extractedData = JSON.parse(result.candidates[0].content.parts[0].text);
+                        if (extractedData.nome || extractedData.dataNascimento || extractedData.numeroDocumento) {
+                            this.updateFields(extractedData);
+                            this.populateDocument(extractedData);
+                        } else {
+                            this.showError("Não foi possível extrair os dados. Tente uma imagem mais nítida.");
+                        }
+                    } else {
+                        console.error('Resposta inesperada da API:', result);
+                        this.showError("Não foi possível processar a resposta da IA. Tente novamente.");
+                    }
+                } catch (error) {
+                    console.error("Erro ao extrair dados:", error);
+                    this.showError("Ocorreu um erro. Verifique o console para mais detalhes.");
+                } finally {
+                    this.setLoadingState(false);
+                }
+            }
+            
+            // Helper methods
+            updateFields(data) {
+                this.nomeInput.value = data.nome || 'Não encontrado';
+                this.dataNascimentoInput.value = data.dataNascimento || 'Não encontrado';
+                this.numeroDocumentoInput.value = data.numeroDocumento || 'Não encontrado';
+            }
+
+            populateDocument(data) {
+                this.updatePlaceholder(this.docNome, data.nome);
+                this.updatePlaceholder(this.docDataNascimento, data.dataNascimento);
+                this.updatePlaceholder(this.docNumeroDocumento, data.numeroDocumento);
+                this.updatePlaceholder(this.docAssinatura, data.nome);
+            }
+
+            updatePlaceholder(element, value) {
+                if (value) {
+                    element.textContent = value;
+                    element.classList.remove('placeholder');
+                    element.classList.add('text-black', 'font-bold');
+                } else {
+                    element.textContent = `[${element.id.replace('doc_', '').toUpperCase()}]`;
+                    element.classList.add('placeholder');
+                    element.classList.remove('text-black', 'font-bold');
+                }
+            }
+            
+            resetForm() {
+                this.errorMessage.textContent = '';
+                [this.nomeInput, this.dataNascimentoInput, this.numeroDocumentoInput].forEach(input => {
+                    input.value = '';
+                    input.placeholder = 'Aguardando extração...';
+                });
+                const placeholders = [this.docNome, this.docDataNascimento, this.docNumeroDocumento, this.docAssinatura];
+                const originalText = ['[NOME COMPLETO]', '[DATA DE NASCIMENTO]', '[NÚMERO DO DOCUMENTO]', '[NOME COMPLETO]'];
+                placeholders.forEach((el, index) => {
+                    el.textContent = originalText[index];
+                    el.classList.add('placeholder');
+                    el.classList.remove('text-black', 'font-bold');
+                });
+            }
+
+            setLoadingState(isLoading, message = 'Extraindo...') {
+                this.extractButton.disabled = isLoading;
+                if (isLoading) {
+                    this.buttonText.textContent = message;
+                    this.loader.classList.remove('hidden');
+                    this.buttonIcon.classList.add('hidden');
+                    this.errorMessage.textContent = '';
+                } else {
+                    this.buttonText.textContent = 'Extrair Dados';
+                    this.loader.classList.add('hidden');
+                    this.buttonIcon.classList.remove('hidden');
+                }
+            }
+            
+            showError(message) {
+                this.errorMessage.textContent = message;
+            }
+        }
+
+        // Initialize the app when the DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            const appRoot = document.getElementById('app-root');
+            new DocumentScannerApp(appRoot);
+        });
+    </script>
+</body>
+</html>

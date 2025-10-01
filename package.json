@@ -1,0 +1,25 @@
+{
+  "name": "scanner-doc-server",
+  "version": "1.0.0",
+  "description": "Servidor local para teste da aplicação Scanner de Documentos",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "mkdir -p public && cp scanner.html public/index.html && cp scanner-app.js public/ && cp *.md public/",
+    "vercel-build": "npm run build"
+  },
+  "keywords": [
+    "scanner",
+    "documentos",
+    "servidor",
+    "local"
+  ],
+  "author": "tonynerd",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "open": "^8.4.0"
+  }
+}
