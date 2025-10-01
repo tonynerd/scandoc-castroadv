@@ -1,4 +1,11 @@
-# 🌐 Configuração de Domínio Personalizado - ScanDoc CastroADV
+# 🌐 Configuração de Domínio Personalizado - ScanDoc### vercel.json (Plano Gratuito)
+```json
+{
+  "version": 2
+}
+```
+
+**Nota**: Configurações de região e alias foram removidas devido às limitações do plano gratuito. O domínio personalizado deve ser configurado manualmente via Dashboard.V
 
 ## 🎯 **Domínio Desejado**
 - **Principal**: `scandoc.castroadv.com`
