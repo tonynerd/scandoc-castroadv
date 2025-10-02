@@ -176,11 +176,7 @@
                 if (file.type.startsWith('image/')) {
                     const reader = new FileReader();
                     reader.onload = (e) => {
-                        this.imagePreview.src = e.target.result;
-                        this.base64Image = e.target.result.split(',')[1];
-                        this.imagePreviewContainer.classList.remove('hidden');
-                        this.extractButton.disabled = false;
-                        this.resetForm();
+                        this.compressAndSetImage(e.target.result);
                     };
                     reader.readAsDataURL(file);
                 } else if (file.type === 'application/pdf') {
@@ -189,6 +185,40 @@
                     this.showError("Formato de arquivo não suportado. Use imagem ou PDF.");
                     this.extractButton.disabled = true;
                 }
+            }
+
+            // Compress image to reduce payload size
+            compressAndSetImage(dataUrl) {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Redimensionar se a imagem for muito grande (máximo 1920px)
+                    const maxWidth = 1920;
+                    const maxHeight = 1920;
+                    let { width, height } = img;
+                    
+                    if (width > maxWidth || height > maxHeight) {
+                        const ratio = Math.min(maxWidth / width, maxHeight / height);
+                        width *= ratio;
+                        height *= ratio;
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    // Desenhar e comprimir
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    
+                    this.imagePreview.src = compressedDataUrl;
+                    this.base64Image = compressedDataUrl.split(',')[1];
+                    this.imagePreviewContainer.classList.remove('hidden');
+                    this.extractButton.disabled = false;
+                    this.resetForm();
+                };
+                img.src = dataUrl;
             }
             
             // Logic to handle PDF files
@@ -209,9 +239,8 @@
                         canvas.height = viewport.height;
                         canvas.width = viewport.width;
                         await page.render({ canvasContext: context, viewport: viewport }).promise;
-                        const imageDataUrl = canvas.toDataURL('image/jpeg', 0.95);
-                        this.imagePreview.src = imageDataUrl;
-                        this.base64Image = imageDataUrl.split(',')[1];
+                        const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                        this.compressAndSetImage(imageDataUrl);
                         this.imagePreviewContainer.classList.remove('hidden');
                         this.extractButton.disabled = false;
                     } catch (error) {
@@ -236,30 +265,25 @@
                 this.resetForm();
 
                 try {
-                    const apiKey = "AIzaSyCD2n9pSRB_YQoR6ibL2EYpJHary04yDUU";
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-                    const systemPrompt = `Você é um assistente de extração de dados altamente preciso. Analise a imagem do documento fornecida. Extraia as seguintes informações: 1. O nome completo da pessoa. 2. A data de nascimento no formato DD/MM/AAAA. 3. O número do documento (como RG, CNH, etc.). Responda APENAS com um objeto JSON contendo as chaves "nome", "dataNascimento" e "numeroDocumento". Se uma informação não puder ser encontrada, retorne null para o valor correspondente.`;
-                    const payload = {
-                        contents: [{ parts: [{ text: systemPrompt }, { inlineData: { mimeType: "image/jpeg", data: this.base64Image } }] }],
-                        generationConfig: { responseMimeType: "application/json" }
-                    };
+                    // Enviar imagem para o servidor processar (chave da API fica segura no backend)
+                    const response = await fetch('/api/extract', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ imageData: this.base64Image })
+                    });
                     
-                    const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                    if (!response.ok) throw new Error(`Erro na API: ${response.statusText}`);
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `Erro na API: ${response.statusText}`);
+                    }
 
-                    const result = await response.json();
+                    const extractedData = await response.json();
                     
-                    if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0].text) {
-                        const extractedData = JSON.parse(result.candidates[0].content.parts[0].text);
-                        if (extractedData.nome || extractedData.dataNascimento || extractedData.numeroDocumento) {
-                            this.updateFields(extractedData);
-                            this.populateDocument(extractedData);
-                        } else {
-                            this.showError("Não foi possível extrair os dados. Tente uma imagem mais nítida.");
-                        }
+                    if (extractedData.nome || extractedData.dataNascimento || extractedData.numeroDocumento) {
+                        this.updateFields(extractedData);
+                        this.populateDocument(extractedData);
                     } else {
-                        console.error('Resposta inesperada da API:', result);
-                        this.showError("Não foi possível processar a resposta da IA. Tente novamente.");
+                        this.showError("Não foi possível extrair os dados. Tente uma imagem mais nítida.");
                     }
                 } catch (error) {
                     console.error("Erro ao extrair dados:", error);
