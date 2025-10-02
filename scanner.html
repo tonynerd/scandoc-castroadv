@@ -236,7 +236,7 @@
                 this.resetForm();
 
                 try {
-                    const apiKey = "AIzaSyCD2n9pSRB_YQoR6ibL2EYpJHary04yDUU";
+                    const apiKey = "GEMINI_API_KEY";
                     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
                     const systemPrompt = `Você é um assistente de extração de dados altamente preciso. Analise a imagem do documento fornecida. Extraia as seguintes informações: 1. O nome completo da pessoa. 2. A data de nascimento no formato DD/MM/AAAA. 3. O número do documento (como RG, CNH, etc.). Responda APENAS com um objeto JSON contendo as chaves "nome", "dataNascimento" e "numeroDocumento". Se uma informação não puder ser encontrada, retorne null para o valor correspondente.`;
                     const payload = {
